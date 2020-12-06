@@ -1,0 +1,7 @@
+name: CenterSpawn
+version: 2.0.0
+api-version: 1.13
+author: Hempfest
+description: A spawn plugin
+main: com.youtube.hempfest.centerspawn.CenterSpawn
+load: POSTWORLD

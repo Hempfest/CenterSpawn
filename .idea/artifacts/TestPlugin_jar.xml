@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="TestPlugin:jar">
+    <output-path>$PROJECT_DIR$/target/TestPlugin_jar</output-path>
+    <root id="archive" name="CenterSpawn.jar">
+      <element id="module-output" name="TestPlugin" />
+    </root>
+  </artifact>
+</component>
