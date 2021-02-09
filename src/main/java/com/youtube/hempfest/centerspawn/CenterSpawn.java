@@ -8,11 +8,12 @@ import com.youtube.hempfest.centerspawn.util.SpawnManager;
 import com.youtube.hempfest.centerspawn.util.SpawnUtil;
 import com.youtube.hempfest.centerspawn.util.event.SpawnBuildEvent;
 import com.youtube.hempfest.clans.HempfestClans;
-import com.youtube.hempfest.clans.util.construct.Claim;
-import com.youtube.hempfest.clans.util.construct.Clan;
-import com.youtube.hempfest.clans.util.construct.ClanUtil;
-import com.youtube.hempfest.clans.util.events.PlayerPunchPlayerEvent;
-import com.youtube.hempfest.clans.util.events.PlayerShootPlayerEvent;
+import com.youtube.hempfest.clans.construct.Claim;
+import com.youtube.hempfest.clans.construct.Clan;
+import com.youtube.hempfest.clans.construct.actions.ClanAction;
+import com.youtube.hempfest.clans.construct.api.ClansAPI;
+import com.youtube.hempfest.clans.util.events.damage.PlayerPunchPlayerEvent;
+import com.youtube.hempfest.clans.util.events.damage.PlayerShootPlayerEvent;
 import java.lang.reflect.Field;
 import java.util.logging.Logger;
 import org.bukkit.Bukkit;
@@ -32,6 +33,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
@@ -96,7 +98,7 @@ public class CenterSpawn extends JavaPlugin implements Listener {
 		int num = 37;
 		int x2 = -num;
 		int z2 = -num;
-		return x <= num && x >= x2 && z <= num && z >= z2;
+		return (x <= num && x >= x2 && z <= num && z >= z2) && location.getWorld().getName().equals("world");
 	}
 
 	public static boolean isInSpawn(Location location) {
@@ -105,7 +107,7 @@ public class CenterSpawn extends JavaPlugin implements Listener {
 		int num = 260;
 		int x2 = -num;
 		int z2 = -num;
-		return x <= num && x >= x2 && z <= num && z >= z2;
+		return (x <= num && x >= x2 && z <= num && z >= z2) && location.getWorld().getName().equals("world");
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -134,16 +136,18 @@ public class CenterSpawn extends JavaPlugin implements Listener {
 	@EventHandler
 	public void onRespawn(PlayerRespawnEvent event) {
 		if (event.getPlayer().getBedSpawnLocation() == null) {
-			ClanUtil clanUtil = Clan.clanUtil;
-			if (clanUtil.getClan(event.getPlayer()) != null) {
-				Clan clan = HempfestClans.clanManager(event.getPlayer());
-				if (clan.getBase() != null) {
-					event.setRespawnLocation(clan.getBase());
-					if (isProtectionZone(event.getPlayer().getLocation())) {
-						SpawnUtil.pastProtect.put(event.getPlayer().getUniqueId(), false);
-					} else
-						SpawnUtil.pastProtect.put(event.getPlayer().getUniqueId(), true);
-					return;
+			if (Bukkit.getPluginManager().isPluginEnabled("ClansPro")) {
+				ClanAction action = Clan.action;
+				if (action.getClan(event.getPlayer().getUniqueId()) != null) {
+					Clan clan = ClansAPI.getInstance().getClan(event.getPlayer().getUniqueId());
+					if (clan.getBase() != null) {
+						event.setRespawnLocation(clan.getBase());
+						if (isProtectionZone(event.getPlayer().getLocation())) {
+							SpawnUtil.pastProtect.put(event.getPlayer().getUniqueId(), false);
+						} else
+							SpawnUtil.pastProtect.put(event.getPlayer().getUniqueId(), true);
+						return;
+					}
 				}
 			}
 			SpawnManager manager = new SpawnManager(event.getPlayer());
@@ -157,8 +161,8 @@ public class CenterSpawn extends JavaPlugin implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onProjectileHit(ProjectileHitEvent event) {
-		if (!Claim.claimUtil.isInClaim(event.getEntity().getLocation())) {
-			if (isInSpawn(event.getEntity().getLocation())) {
+		if (!Claim.action.isInClaim(event.getEntity().getLocation())) {
+			if (isInSpawn(event.getEntity().getLocation()) && event.getEntity().getWorld().getName().equals("world")) {
 				event.getEntity().remove();
 			}
 		}
@@ -170,6 +174,22 @@ public class CenterSpawn extends JavaPlugin implements Listener {
 		Bukkit.getPluginManager().callEvent(e);
 		e.perform();
 		event.setCancelled(e.isCancelled());
+	}
+
+	@EventHandler(priority = EventPriority.NORMAL)
+	public void onHurt(EntityDamageEvent e) {
+		if (e.getEntity() instanceof Player) {
+			Player p = (Player) e.getEntity();
+			if (isProtectionZone(p.getLocation())) {
+				if (!SpawnUtil.spawnProtected.containsKey(p.getUniqueId())) {
+					e.setCancelled(true);
+					return;
+				}
+				if (SpawnUtil.spawnProtected.get(p.getUniqueId())) {
+					e.setCancelled(true);
+				}
+			}
+		}
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST)
@@ -199,6 +219,9 @@ public class CenterSpawn extends JavaPlugin implements Listener {
 				spawn.teleport();
 				SpawnUtil.spawnProtected.put(event.getPlayer().getUniqueId(), true);
 			}, 2L);
+		} else {
+			SpawnUtil.spawnProtected.put(event.getPlayer().getUniqueId(), false);
+			return;
 		}
 	}
 

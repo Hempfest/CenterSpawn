@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: com.github.Hempfest:ClansPro:1-DEV">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/Hempfest/ClansPro/1-DEV/ClansPro-1-DEV.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/Hempfest/ClansPro/1-DEV/ClansPro-1-DEV-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/Hempfest/ClansPro/1-DEV/ClansPro-1-DEV-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

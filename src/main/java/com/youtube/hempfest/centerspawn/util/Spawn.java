@@ -24,6 +24,7 @@ public class Spawn extends SpawnUtil{
     public void create() {
         Player p = manager.getPlayer();
         spawn().set("Location", p.getLocation());
+        p.getWorld().setSpawnLocation(p.getLocation());
         action = "Set";
     }
 

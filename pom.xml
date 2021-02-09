@@ -37,8 +37,9 @@
 		</dependency>
 		<dependency>
 			<groupId>com.github.Hempfest</groupId>
-			<artifactId>Clans</artifactId>
-			<version>2.0.8-R2</version>
+			<artifactId>ClansPro</artifactId>
+			<version>1-DEV</version>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 </project>

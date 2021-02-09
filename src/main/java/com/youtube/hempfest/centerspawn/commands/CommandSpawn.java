@@ -5,17 +5,16 @@ import com.youtube.hempfest.centerspawn.util.Config;
 import com.youtube.hempfest.centerspawn.util.Spawn;
 import com.youtube.hempfest.centerspawn.util.SpawnManager;
 import com.youtube.hempfest.centerspawn.util.SpawnUtil;
+import com.youtube.hempfest.clans.construct.Clan;
+import com.youtube.hempfest.clans.construct.api.ClansAPI;
+import java.util.Arrays;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerRespawnEvent;
-
-import java.util.Arrays;
 
 public class CommandSpawn extends BukkitCommand {
 
@@ -58,7 +57,18 @@ public class CommandSpawn extends BukkitCommand {
             for (Entity e : p.getNearbyEntities(30, 30, 30)) {
                 if (e instanceof Player) {
                     Player target = (Player) e;
-                    manager.msg("&c&oAnother player is too close! Try again later.");
+                    if (Clan.action.getClan(p.getUniqueId()) != null) {
+                        Clan c = ClansAPI.getInstance().getClan(p.getUniqueId());
+                        if (Arrays.asList(c.getMembers()).contains(target.getUniqueId().toString())) {
+                            break;
+                        }
+                    }
+                    manager.msg("&c&oAnother player is too close! Teleporting in 10 seconds...");
+                    Bukkit.getScheduler().scheduleSyncDelayedTask(CenterSpawn.getInstance(), () -> {
+                        spawn.teleport();
+                        manager.msg("&aWelcome to spawn!");
+                        SpawnUtil.spawnProtected.put(p.getUniqueId(), true);
+                    }, 20 * 10);
                     return true;
                 }
             }
