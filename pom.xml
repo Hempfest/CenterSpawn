@@ -38,7 +38,7 @@
 		<dependency>
 			<groupId>com.github.Hempfest</groupId>
 			<artifactId>ClansPro</artifactId>
-			<version>1-DEV</version>
+			<version>1.0.5</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
